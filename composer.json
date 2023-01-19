@@ -1,0 +1,22 @@
+{
+    "name": "tualo/remotebrowser",
+    "description": "tualo - remote pdf",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Thomas Hoffmann",
+            "email": "thomas.hoffmann@tualo.de"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Tualo\\Office\\RemoteBrowser\\": "src/"
+        },
+        "files": ["src/functions.php"]
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "spatie/browsershot": "*"
+    }
+}
