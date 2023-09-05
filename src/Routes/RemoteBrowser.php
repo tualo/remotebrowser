@@ -24,9 +24,11 @@ class Route implements IRoute{
                 $pollingInMilliseconds = 30;
                 $timeoutInMilliseconds = 3000;
 
-                $url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].''.dirname($_SERVER['SCRIPT_NAME']) .'/_/'.$db->singleValue('select @sessionid s',[],'s').'/pugreporthtml/'.$matches['tablename'].'/'.$matches['template'].'/'.$matches['id'].'';
+
+                $url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].''.dirname($_SERVER['SCRIPT_NAME']) .''.$db->singleValue('select @sessionid s',[],'s').'/pugreporthtml/'.$matches['tablename'].'/'.$matches['template'].'/'.$matches['id'].'';
                 header('Content-type: application/pdf');
                 Browsershot::url( $url )
+                    ->useCookies([@session_name() => @session_id()])
                     ->showBackground()
                     ->waitUntilNetworkIdle()
                     ->format('A4')
