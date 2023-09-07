@@ -6,7 +6,7 @@ use Spatie\Browsershot\Browsershot;
 use Tualo\Office\Basic\TualoApplication as App;
 use Tualo\Office\Basic\Route as BasicRoute;
 use Tualo\Office\Basic\IRoute;
-
+use Tualo\Office\RemoteBrowser\RemotePDF;
 class Route implements IRoute{
 
     public static function register(){
@@ -18,23 +18,11 @@ class Route implements IRoute{
             $sessiondb = App::get('session')->db;
 
             try{
-                // an image will be saved
-                
-                $localfilename = App::get('tempPath').'/'.$db->singleValue('select uuid() s',[],'s').'.pdf';
-                $pollingInMilliseconds = 30;
-                $timeoutInMilliseconds = 3000;
-
-
-                $url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].''.dirname($_SERVER['SCRIPT_NAME']) .''.$db->singleValue('select @sessionid s',[],'s').'/pugreporthtml/'.$matches['tablename'].'/'.$matches['template'].'/'.$matches['id'].'';
-                header('Content-type: application/pdf');
-                Browsershot::url( $url )
-                    ->useCookies([@session_name() => @session_id()])
-                    ->showBackground()
-                    ->waitUntilNetworkIdle()
-                    ->format('A4')
-                    ->save( $localfilename );
-                readfile($localfilename);
-                unlink($localfilename);
+                $res = RemotePDF::get($matches['tablename'],$matches['template'],$matches['id']);
+                if (isset($res['filename'])){
+                    readfile($res['filename']);
+                    unlink($res['filename']);
+                }
                 exit();       
             }catch(\Exception $e){
                 App::result('last_sql', $db->last_sql );
