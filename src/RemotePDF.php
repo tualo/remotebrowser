@@ -39,7 +39,7 @@ class RemotePDF{
         }
 
         $url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].''.dirname($_SERVER['SCRIPT_NAME']) .''.$db->singleValue('select @sessionid s',[],'s').'/pugreporthtml/'.$tablename.'/'.$template.'/'.$id.'';
-        header('Content-type: application/pdf');
+        // header('Content-type: application/pdf');
         Browsershot::url( $url )
             ->useCookies([@session_name() => @session_id()])
             ->showBackground()
