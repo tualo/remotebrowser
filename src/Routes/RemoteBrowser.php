@@ -20,6 +20,7 @@ class Route implements IRoute{
             try{
                 $res = RemotePDF::get($matches['tablename'],$matches['template'],$matches['id']);
                 if (isset($res['filename'])){
+                    header('Content-type: application/pdf');
                     readfile($res['filename']);
                     unlink($res['filename']);
                 }
