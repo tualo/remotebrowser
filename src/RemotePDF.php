@@ -23,12 +23,14 @@ class RemotePDF{
         $GLOBALS['pug_cache']=App::get("basePath").'/cache/'.$db->dbname.'/ds';
         $title = $db->singleValue('select uuid() s',[],'s');
             
+        PUGRenderingHelper::exportPUG($db);
+        $html = PUGRenderingHelper::render([$id], $template, [
+            'tablename'=>$tablename,
+        ]);
+        $dom = new DOMDocument();
+        
         if($getTitle){
-            PUGRenderingHelper::exportPUG($db);
-            $html = PUGRenderingHelper::render([$id], $template, [
-                'tablename'=>$tablename,
-            ]);
-            $dom = new DOMDocument();
+            
 
             if($dom->loadHTML($html)) {
                 $list = $dom->getElementsByTagName("title");
@@ -40,13 +42,18 @@ class RemotePDF{
 
         $url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].''.dirname($_SERVER['SCRIPT_NAME']) .''.$db->singleValue('select @sessionid s',[],'s').'/pugreporthtml/'.$tablename.'/'.$template.'/'.$id.'';
         // header('Content-type: application/pdf');
+
+
+        //Browsershot::html($html)->newHeadless()->showBackground()->format('A4')->save( $localfilename );
+        
         Browsershot::url( $url )
+            ->newHeadless()
             ->useCookies([@session_name() => @session_id()])
             ->showBackground()
             ->waitUntilNetworkIdle()
             ->format('A4')
             ->save( $localfilename );
-
+        
         return [
             'filename'=>$localfilename,
             'title'=>$title,
