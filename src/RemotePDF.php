@@ -46,13 +46,24 @@ class RemotePDF{
 
         //Browsershot::html($html)->newHeadless()->showBackground()->format('A4')->save( $localfilename );
         
-        Browsershot::url( $url )
+        if( App::configuration('browsershot','useHeadless','0')=='1'){
+            Browsershot::url( $url )
             ->newHeadless()
             ->useCookies([@session_name() => @session_id()])
             ->showBackground()
             ->waitUntilNetworkIdle()
             ->format('A4')
             ->save( $localfilename );
+        }else{
+            Browsershot::url( $url )
+            ->useCookies([@session_name() => @session_id()])
+            ->showBackground()
+            ->waitUntilNetworkIdle()
+            ->format('A4')
+            ->save( $localfilename );
+        }
+
+        
         
         return [
             'filename'=>$localfilename,
