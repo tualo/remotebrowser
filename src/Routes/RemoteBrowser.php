@@ -16,7 +16,6 @@ class Route implements IRoute{
 
             $db = App::get('session')->getDB();
             $sessiondb = App::get('session')->db;
-
             try{
                 $res = RemotePDF::get($matches['tablename'],$matches['template'],$matches['id']);
                 if (isset($res['filename'])){

@@ -4,6 +4,7 @@ use Spatie\Browsershot\Browsershot;
 use Tualo\Office\Basic\TualoApplication as App;
 use Tualo\Office\PUG\PUGRenderingHelper;
 use DOMDocument;
+use GuzzleHttp\Client;
 
 class RemotePDF{
  
@@ -43,26 +44,53 @@ class RemotePDF{
         $url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].''.dirname($_SERVER['SCRIPT_NAME']) .''.$db->singleValue('select @sessionid s',[],'s').'/pugreporthtml/'.$tablename.'/'.$template.'/'.$id.'';
         // header('Content-type: application/pdf');
 
+        try{
+            $client = new Client(
+                [
+                    'base_uri' => "http://localhost:3000",
+                    'timeout'  => 2.0,
+                ]
+            );
 
-        //Browsershot::html($html)->newHeadless()->showBackground()->format('A4')->save( $localfilename );
-        
-        if( App::configuration('browsershot','useHeadless','0')=='1'){
-            Browsershot::url( $url )
-            ->newHeadless()
-            ->useCookies([@session_name() => @session_id()])
-            ->showBackground()
-            ->waitUntilNetworkIdle()
-            ->format('A4')
-            ->save( $localfilename );
-        }else{
-            Browsershot::url( $url )
-            ->useCookies([@session_name() => @session_id()])
-            ->showBackground()
-            ->waitUntilNetworkIdle()
-            ->format('A4')
-            ->save( $localfilename );
+            $cookie = @session_get_cookie_params();
+            $cookie['name'] = @session_name();
+            $cookie['value'] = @session_id();
+            $cookie['domain'] = $_SERVER['HTTP_HOST'];
+            $response = $client->post('/pdf', [
+                'json' => [
+                    'url' => $url ,
+                    'cookies' => [ $cookie ],
+                ]
+            ]);
+            $code = $response->getStatusCode(); // 200
+        // $reason = $response->getReasonPhrase(); // OK
+        }catch(\Exception $e){
+            $code = 500;
         }
+        if ($code == 200) {
+            $pdf = $response->getBody();
+            file_put_contents($localfilename, $pdf);
+        }else{
 
+            //Browsershot::html($html)->newHeadless()->showBackground()->format('A4')->save( $localfilename );
+            
+            if( App::configuration('browsershot','useHeadless','0')=='1'){
+                Browsershot::url( $url )
+                ->newHeadless()
+                ->useCookies([@session_name() => @session_id()])
+                ->showBackground()
+                ->waitUntilNetworkIdle()
+                ->format('A4')
+                ->save( $localfilename );
+            }else{
+                Browsershot::url( $url )
+                ->useCookies([@session_name() => @session_id()])
+                ->showBackground()
+                ->waitUntilNetworkIdle()
+                ->format('A4')
+                ->save( $localfilename );
+            }
+        }
         
         
         return [
