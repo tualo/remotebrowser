@@ -45,25 +45,28 @@ class RemotePDF{
         // header('Content-type: application/pdf');
 
         try{
-            $client = new Client(
-                [
-                    'base_uri' => "http://localhost:3000",
-                    'timeout'  => 2.0,
-                ]
-            );
+            if (App::configuration('browsershot','remote_service','')!=''){
+                $client = new Client(
+                    [
+                        'base_uri' => App::configuration('browsershot','remote_service',''),
+                        'timeout'  => 2.0,
+                    ]
+                );
 
-            $cookie = @session_get_cookie_params();
-            $cookie['name'] = @session_name();
-            $cookie['value'] = @session_id();
-            $cookie['domain'] = $_SERVER['HTTP_HOST'];
-            $response = $client->post('/pdf', [
-                'json' => [
-                    'url' => $url ,
-                    'cookies' => [ $cookie ],
-                ]
-            ]);
-            $code = $response->getStatusCode(); // 200
-        // $reason = $response->getReasonPhrase(); // OK
+                $cookie = @session_get_cookie_params();
+                $cookie['name'] = @session_name();
+                $cookie['value'] = @session_id();
+                $cookie['domain'] = $_SERVER['HTTP_HOST'];
+                $response = $client->post('/pdf', [
+                    'json' => [
+                        'url' => $url ,
+                        'cookies' => [ $cookie ],
+                    ]
+                ]);
+                $code = $response->getStatusCode(); // 200
+            }else{
+                $code = 500;
+            }
         }catch(\Exception $e){
             $code = 500;
         }
