@@ -47,6 +47,10 @@ class RemotePDF{
         $url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].''.dirname($_SERVER['SCRIPT_NAME']) .''.$db->singleValue('select @sessionid s',[],'s').'/pugreporthtml/'.$tablename.'/'.$template.'/'.$id.'';
 
 
+        $token='';
+        $session = App::get('session');
+
+
         if (isset($_SESSION['tualoapplication']['oauth'])){
 
             $session = App::get('session');
@@ -79,11 +83,9 @@ class RemotePDF{
                     ];
                 }
                 $response = $client->post('/pdf', [
-                    'json' => [
-                        'url' => $url ,
-                        'cookies' => [ $cookie ],
-                    ]
+                    'json' => $o
                 ]);
+
                 $code = $response->getStatusCode(); // 200
             }else{
                 $code = 500;
@@ -114,6 +116,10 @@ class RemotePDF{
                 ->format('A4')
                 ->save( $localfilename );
             }
+        }
+
+        if ($token!=''){
+            $session->removeToken($token);
         }
         
         
