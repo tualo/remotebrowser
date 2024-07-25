@@ -45,10 +45,13 @@ class RemotePDF{
         }
 
         $url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].''.dirname($_SERVER['SCRIPT_NAME']) .''.$db->singleValue('select @sessionid s',[],'s').'/pugreporthtml/'.$tablename.'/'.$template.'/'.$id.'';
-        // header('Content-type: application/pdf');
-        if (isset($_SESSION['tualoapplication']['oauth'])){
-            $token = App::configuration('browsershot','remote_service_token',$_SESSION['tualoapplication']['oauth']);
 
+
+        if (isset($_SESSION['tualoapplication']['oauth'])){
+
+            $session = App::get('session');
+            $token = $session->registerOAuth($params=['cmp'=>'cmp_ds'],$force=true,$anyclient=false,$path='/pugreporthtml/'.$tablename.'/'.$template.'/'.$id);
+            $session->oauthSingleUse($token);
             $url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/~/'. $token .''.$db->singleValue('select @sessionid s',[],'s').'/pugreporthtml/'.$tablename.'/'.$template.'/'.$id.'';
         }
 
@@ -65,6 +68,16 @@ class RemotePDF{
                 $cookie['name'] = @session_name();
                 $cookie['value'] = @session_id();
                 $cookie['domain'] = $_SERVER['HTTP_HOST'];
+
+                $o = [
+                    'url' => $url ,
+                    'cookies' => [ $cookie ],
+                ];
+                if (isset($_SESSION['tualoapplication']['oauth'])){
+                    $o = [
+                        'url' => $url 
+                    ];
+                }
                 $response = $client->post('/pdf', [
                     'json' => [
                         'url' => $url ,
