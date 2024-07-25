@@ -13,6 +13,7 @@ class RemotePDF{
         $localfilename = App::get('tempPath').'/'.$db->singleValue('select uuid() s',[],'s').'.pdf';
         $pollingInMilliseconds = 30;
         $timeoutInMilliseconds = 3000;
+        $title = $db->singleValue('select uuid() s',[],'s');
 
         if (App::configuration('browsershot','remote_service','')==''){
             $url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].''.dirname($_SERVER['SCRIPT_NAME']) .''.$db->singleValue('select @sessionid s',[],'s').'/pugreporthtml/'.$tablename.'/'.$template.'/'.$id.'';
@@ -23,7 +24,7 @@ class RemotePDF{
                 mkdir(App::get("basePath").'/cache/'.$db->dbname.'/ds');
             }
             $GLOBALS['pug_cache']=App::get("basePath").'/cache/'.$db->dbname.'/ds';
-            $title = $db->singleValue('select uuid() s',[],'s');
+            
                 
             PUGRenderingHelper::exportPUG($db);
             $html = PUGRenderingHelper::render([$id], $template, [
