@@ -99,7 +99,10 @@ class RemotePDF{
         }else{
 
             //Browsershot::html($html)->newHeadless()->showBackground()->format('A4')->save( $localfilename );
-            
+            /*
+            ->setNodeBinary('/usr/local/bin/node')
+            ->setNpmBinary('/usr/local/bin/npm');
+            */
             if( App::configuration('browsershot','useHeadless','0')=='1'){
                 Browsershot::url( $url )
                 ->newHeadless()
