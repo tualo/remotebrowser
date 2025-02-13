@@ -125,6 +125,7 @@ class RemotePDF
                     ->showBackground()
                     ->waitUntilNetworkIdle()
                     ->format('A4')
+                    ->disableCaptureURLs()
                     ->save($localfilename);
             } else {
                 Browsershot::url($url)
