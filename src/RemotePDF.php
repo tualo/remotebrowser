@@ -117,9 +117,10 @@ class RemotePDF
                     ->setEnvironmentOptions(
                         [
                             'XDG_CONFIG_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
-                            'XDG_CACHE_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium'
+                            'XDG_CACHE_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
                         ]
                     )
+//                    ->setChromePath("/usr/bin/chromium")
                     ->newHeadless()
                     ->useCookies([@session_name() => @session_id()])
                     ->showBackground()
