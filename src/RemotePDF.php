@@ -30,6 +30,7 @@ class RemotePDF
             $GLOBALS['pug_cache'] = App::get("basePath") . '/cache/' . $db->dbname . '/ds';
 
 
+
             PUGRenderingHelper::exportPUG($db);
             $html = PUGRenderingHelper::render([$id], $template, [
                 'tablename' => $tablename,
@@ -113,24 +114,30 @@ class RemotePDF
                     mkdir(App::get("tempPath") . '/chromium_cache/' . $db->dbname, 0777, true);
                 }
 
-                Browsershot::url($url)
-                    ->setEnvironmentOptions(
-                        [
-                            'XDG_CONFIG_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
-                            'XDG_CACHE_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
-                        ]
-                    )
-//                    ->setChromePath("/usr/bin/chromium")
+                $browsershot = Browsershot::url($url);
+
+                if (App::configuration('browsershot', 'chrome_path')) $browsershot->setChromePath(App::configuration('browsershot', 'chrome_path'));
+
+
+                $browsershot->setEnvironmentOptions(
+                    [
+                        'XDG_CONFIG_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
+                        'XDG_CACHE_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
+                    ]
+                )
                     ->newHeadless()
                     ->useCookies([@session_name() => @session_id()])
                     ->showBackground()
                     ->waitUntilNetworkIdle()
                     ->format('A4')
+                    ->margins(5, 5, 5, 5)
                     ->disableCaptureURLs()
                     ->save($localfilename);
             } else {
-                Browsershot::url($url)
-                    ->useCookies([@session_name() => @session_id()])
+                $browsershot = Browsershot::url($url);
+                if (App::configuration('browsershot', 'chrome_path')) $browsershot->setChromePath(App::configuration('browsershot', 'chrome_path'));
+
+                $browsershot->useCookies([@session_name() => @session_id()])
                     ->showBackground()
                     ->waitUntilNetworkIdle()
                     ->format('A4')
