@@ -1,23 +1,26 @@
 {
-    "name": "tualo/remotebrowser",
-    "description": "tualo - remote pdf",
-    "type": "library",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Thomas Hoffmann",
-            "email": "thomas.hoffmann@tualo.de"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Tualo\\Office\\RemoteBrowser\\": "src/"
-        },
-        "files": ["src/functions.php"]
-    },
-    "minimum-stability": "dev",
-    "require": {
-        "guzzlehttp/guzzle": "*",
-        "spatie/browsershot": "*"
+  "name": "tualo/remotebrowser",
+  "description": "tualo - remote pdf",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Thomas Hoffmann",
+      "email": "thomas.hoffmann@tualo.de"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Tualo\\Office\\RemoteBrowser\\": "src/"
+    },
+    "files": [
+      "src/functions.php"
+    ]
+  },
+  "minimum-stability": "dev",
+  "require": {
+    "guzzlehttp/guzzle": "^7.9.3",
+    "spatie/browsershot": "~5.0.10"
+  },
+  "version": "1.0.1"
 }
