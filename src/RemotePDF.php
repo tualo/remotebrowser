@@ -115,6 +115,11 @@ class RemotePDF
                 }
 
                 $browsershot = Browsershot::url($url);
+                //  'noSandbox' => true,
+                if (App::configuration('browsershot', 'noSandbox', '0') == '1') {
+                    $browsershot->noSandbox();
+                }
+
 
                 if (App::configuration('browsershot', 'chrome_path')) $browsershot->setChromePath(App::configuration('browsershot', 'chrome_path'));
 
