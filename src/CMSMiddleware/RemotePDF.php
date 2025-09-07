@@ -2,15 +2,15 @@
 
 namespace Tualo\Office\RemoteBrowser\CMSMiddleware;
 
-use Tualo\Office\RemoteBrowser\RemotePDF as PDF;
+use Tualo\Office\RemoteBrowser\RemotePDF;
 
-class RemotePDF
+class PDF
 {
 
     public static function pdf(): callable
     {
         return function (string $table, string $template, string $id): string {
-            return $res = PDF::get($table, $template, $id);
+            return $res = RemotePDF::get($table, $template, $id);
         };
     }
 
