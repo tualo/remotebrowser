@@ -19,7 +19,7 @@ class RemotePDF
         $timeoutInMilliseconds = 3000;
         $title = $db->singleValue('select uuid() s', [], 's');
 
-        if (App::configuration('browsershot', 'remote_service', '') == '') {
+        if (App::configuration('browsershot', 'use', '') == '') {
             $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '' . dirname($_SERVER['SCRIPT_NAME']) . '' . $db->singleValue('select @sessionid s', [], 's') . '/pugreporthtml/' . $tablename . '/' . $template . '/' . $id . '';
             if (!file_exists(App::get("basePath") . '/cache/' . $db->dbname)) {
                 mkdir(App::get("basePath") . '/cache/' . $db->dbname);
