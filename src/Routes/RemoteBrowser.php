@@ -8,7 +8,7 @@ use Tualo\Office\Basic\Route as BasicRoute;
 use Tualo\Office\Basic\IRoute;
 use Tualo\Office\RemoteBrowser\RemotePDF;
 
-class Route implements IRoute
+class Route extends \Tualo\Office\Basic\RouteWrapper
 {
 
     public static function register()
