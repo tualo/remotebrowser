@@ -59,7 +59,14 @@ class RemotePDF
         if (isset($_SESSION['tualoapplication']['oauth'])) {
 
             $session = App::get('session');
-            $token = $session->registerOAuth($params = ['cmp' => 'cmp_ds'], $force = true, $anyclient = false, $path = '/pugreporthtml/' . $tablename . '/' . $template . '/' . $id);
+            $token = $session->registerOAuth(
+                /*$params = ['cmp' => 'cmp_ds'],*/
+                $force = true,
+                $anyclient = false,
+                $path = '/pugreporthtml/' . $tablename . '/' . $template . '/' . $id,
+                $name = 'RemotePDF Generation',
+                $device = 'Server',
+            );
             $session->oauthSingleUse($token);
             $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/~/' . $token . '' . $db->singleValue('select @sessionid s', [], 's') . '/pugreporthtml/' . $tablename . '/' . $template . '/' . $id . '';
         }
@@ -124,6 +131,10 @@ class RemotePDF
                 if (App::configuration('browsershot', 'chrome_path')) $browsershot->setChromePath(App::configuration('browsershot', 'chrome_path'));
 
 
+                if ($token == '') {
+                    $browsershot->useCookies([@session_name() => @session_id()]);
+                }
+
                 $browsershot->setEnvironmentOptions(
                     [
                         'XDG_CONFIG_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
@@ -131,7 +142,7 @@ class RemotePDF
                     ]
                 )
                     ->newHeadless()
-                    ->useCookies([@session_name() => @session_id()])
+                    ->preventUnsuccessfulResponse()
                     ->showBackground()
                     ->waitUntilNetworkIdle()
                     ->format('A4')
@@ -142,8 +153,13 @@ class RemotePDF
                 $browsershot = Browsershot::url($url);
                 if (App::configuration('browsershot', 'chrome_path')) $browsershot->setChromePath(App::configuration('browsershot', 'chrome_path'));
 
-                $browsershot->useCookies([@session_name() => @session_id()])
+                if ($token == '') {
+                    $browsershot->useCookies([@session_name() => @session_id()]);
+                }
+
+                $browsershot
                     ->showBackground()
+                    ->preventUnsuccessfulResponse()
                     ->waitUntilNetworkIdle()
                     ->format('A4')
                     ->save($localfilename);
