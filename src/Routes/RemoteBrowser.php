@@ -42,5 +42,49 @@ class Route extends \Tualo\Office\Basic\RouteWrapper
             }
             App::contenttype('application/json');
         }, ['get', 'post'], true);
+
+
+        BasicRoute::add('/remote/pdf_store/(?P<tablename>[\w\-\_]+)/(?P<template>[\w\-\_]+)/(?P<id>.+)', function ($matches) {
+
+            $db = App::get('session')->getDB();
+            $sessiondb = App::get('session')->db;
+            try {
+                $res = RemotePDF::get($matches['tablename'], $matches['template'], $matches['id']);
+                if (isset($res['filename'])) {
+                    /*
+                    header('Content-type: application/pdf');
+                    header('Content-Disposition: inline; filename="' . $matches['id'] . '.pdf"');
+                    header('Content-Transfer-Encoding: binary');
+                    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+                    header('Access-Control-Allow-Credentials: true');
+
+
+                    header('X-Content-Type-Options: nosniff');
+                    header('Cache-Control: must-revalidate');
+                    header('Pragma: public');
+                    header('Expires: 0');
+                    header('Content-Length: ' . filesize($res['filename']));
+                    readfile($res['filename']);
+                    unlink($res['filename']);
+                    */
+
+                    App::result('filename', $res['filename']);
+                    $target = basename($res['filename']);
+                    if (isset($_GET['fname'])) {
+                        $target = $_GET['fname'];
+                    }
+                    if (!file_exists(basename(App::configuration('remotebrowser', 'storage') . '/' . $target))) {
+                        mkdir(basename(App::configuration('remotebrowser', 'storage') . '/' . $target), 0777, true);
+                    }
+                    copy($res['filename'], App::configuration('remotebrowser', 'storage') . '/' . $target);
+                    unlink($res['filename']);
+                }
+                exit();
+            } catch (\Exception $e) {
+                App::result('last_sql', $db->last_sql);
+                App::result('msg', $e->getMessage());
+            }
+            App::contenttype('application/json');
+        }, ['get'], true);
     }
 }
