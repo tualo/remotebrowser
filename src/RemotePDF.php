@@ -104,6 +104,7 @@ class RemotePDF
         }
 
         try {
+            try {
                 if (App::configuration('browsershot', 'remote_service', '') != '') {
                     $client = new Client(
                         [
@@ -164,6 +165,7 @@ class RemotePDF
 
                     if (App::configuration('browsershot', 'node_binary')) {
                         $browsershot->setNodeBinary(App::configuration('browsershot', 'node_binary'));
+                    }
                     if (App::configuration('browsershot', 'npm_binary')) {
                         $browsershot->setNpmBinary(App::configuration('browsershot', 'npm_binary'));
                     }
