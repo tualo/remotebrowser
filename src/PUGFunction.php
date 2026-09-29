@@ -19,11 +19,13 @@ class PUGFunction implements IPUGFunction
 
     public static function fn(): mixed
     {
-        return function (string $tablename, string $template, string $id, bool $getTitle = false): string {
+        return function (string $tablename, string $template, string $id, bool $getTitle = false): void {
             $res = RemotePDF::get($tablename, $template, $id, $getTitle);
-            $data = file_get_contents($res['filename']);
+            header('Content-type: application/pdf');
+            header('Content-disposition: filename="' . $id . '.pdf"');
+            readfile($res['filename']);
             unlink($res['filename']);
-            return $data;
+            exit();
         };
     }
 }
