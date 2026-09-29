@@ -104,107 +104,119 @@ class RemotePDF
         }
 
         try {
-            if (App::configuration('browsershot', 'remote_service', '') != '') {
-                $client = new Client(
-                    [
-                        'base_uri' => App::configuration('browsershot', 'remote_service', ''),
-                        'timeout'  => floatval(App::configuration('browsershot', 'remote_service_timeout', 3.0)),
-                    ]
-                );
+                if (App::configuration('browsershot', 'remote_service', '') != '') {
+                    $client = new Client(
+                        [
+                            'base_uri' => App::configuration('browsershot', 'remote_service', ''),
+                            'timeout'  => floatval(App::configuration('browsershot', 'remote_service_timeout', 3.0)),
+                        ]
+                    );
 
-                $cookie = @session_get_cookie_params();
-                $cookie['name'] = @session_name();
-                $cookie['value'] = @session_id();
-                $cookie['domain'] = $_SERVER['HTTP_HOST'];
+                    $cookie = @session_get_cookie_params();
+                    $cookie['name'] = @session_name();
+                    $cookie['value'] = @session_id();
+                    $cookie['domain'] = $_SERVER['HTTP_HOST'];
 
-                $o = [
-                    'url' => $url,
-                    'cookies' => [$cookie],
-                ];
-                if (isset($_SESSION['tualoapplication']['oauth'])) {
                     $o = [
-                        'url' => $url
+                        'url' => $url,
+                        'cookies' => [$cookie],
                     ];
-                }
-                $response = $client->post('/pdf', [
-                    'json' => $o
-                ]);
+                    if (isset($_SESSION['tualoapplication']['oauth'])) {
+                        $o = [
+                            'url' => $url
+                        ];
+                    }
+                    $response = $client->post('/pdf', [
+                        'json' => $o
+                    ]);
 
-                $code = $response->getStatusCode(); // 200
-            } else {
+                    $code = $response->getStatusCode(); // 200
+                } else {
+                    $code = 500;
+                }
+            } catch (\Exception $e) {
                 $code = 500;
             }
-        } catch (\Exception $e) {
-            $code = 500;
-        }
-        if ($code == 200) {
-            $pdf = $response->getBody();
-            file_put_contents($localfilename, $pdf);
-        } else {
-
-            //Browsershot::html($html)->newHeadless()->showBackground()->format('A4')->save( $localfilename );
-            /*
-            ->setNodeBinary('/usr/local/bin/node')
-            ->setNpmBinary('/usr/local/bin/npm');
-            */
-            if (App::configuration('browsershot', 'useHeadless', '0') == '1') {
-
-                if (!file_exists(App::get("tempPath") . '/chromium_cache/' . $db->dbname)) {
-                    mkdir(App::get("tempPath") . '/chromium_cache/' . $db->dbname, 0777, true);
-                }
-
-                $browsershot = Browsershot::url($url);
-                //  'noSandbox' => true,
-                if (App::configuration('browsershot', 'noSandbox', '0') == '1') {
-                    $browsershot->noSandbox();
-                }
-
-
-                if (App::configuration('browsershot', 'chrome_path')) $browsershot->setChromePath(App::configuration('browsershot', 'chrome_path'));
-
-
-                if ($token == '') {
-                    $browsershot->useCookies([@session_name() => @session_id()]);
-                }
-
-                $browsershot->setEnvironmentOptions(
-                    [
-                        'XDG_CONFIG_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
-                        'XDG_CACHE_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
-                    ]
-                )
-                    ->newHeadless()
-                    ->preventUnsuccessfulResponse()
-                    ->showBackground()
-                    ->waitUntilNetworkIdle()
-                    ->format('A4')
-                    ->margins(5, 5, 5, 5)
-                    ->disableCaptureURLs()
-                    ->save($localfilename);
+            if ($code == 200) {
+                $pdf = $response->getBody();
+                file_put_contents($localfilename, $pdf);
             } else {
-                $browsershot = Browsershot::url($url);
-                if (App::configuration('browsershot', 'chrome_path')) $browsershot->setChromePath(App::configuration('browsershot', 'chrome_path'));
 
-                if ($token == '') {
-                    $browsershot->useCookies([@session_name() => @session_id()]);
+                //Browsershot::html($html)->newHeadless()->showBackground()->format('A4')->save( $localfilename );
+                /*
+                ->setNodeBinary('/usr/local/bin/node')
+                ->setNpmBinary('/usr/local/bin/npm');
+                */
+                if (App::configuration('browsershot', 'useHeadless', '0') == '1') {
+
+                    if (!file_exists(App::get("tempPath") . '/chromium_cache/' . $db->dbname)) {
+                        mkdir(App::get("tempPath") . '/chromium_cache/' . $db->dbname, 0777, true);
+                    }
+
+                    $browsershot = Browsershot::url($url);
+                    //  'noSandbox' => true,
+                    if (App::configuration('browsershot', 'noSandbox', '0') == '1') {
+                        $browsershot->noSandbox();
+                    }
+
+
+                    if (App::configuration('browsershot', 'chrome_path')) $browsershot->setChromePath(App::configuration('browsershot', 'chrome_path'));
+
+                    if (App::configuration('browsershot', 'node_binary')) {
+                        $browsershot->setNodeBinary(App::configuration('browsershot', 'node_binary'));
+                    if (App::configuration('browsershot', 'npm_binary')) {
+                        $browsershot->setNpmBinary(App::configuration('browsershot', 'npm_binary'));
+                    }
+
+
+                    if ($token == '') {
+                        $browsershot->useCookies([@session_name() => @session_id()]);
+                    }
+
+                    $browsershot->setEnvironmentOptions(
+                        [
+                            'XDG_CONFIG_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
+                            'XDG_CACHE_HOME' => App::get("tempPath") . '/chromium_cache/' . $db->dbname . '/.chromium',
+                        ]
+                    )
+                        ->newHeadless()
+                        ->preventUnsuccessfulResponse()
+                        ->showBackground()
+                        ->waitUntilNetworkIdle()
+                        ->format('A4')
+                        ->margins(5, 5, 5, 5)
+                        ->disableCaptureURLs()
+                        ->save($localfilename);
+                } else {
+                    $browsershot = Browsershot::url($url);
+                    if (App::configuration('browsershot', 'chrome_path')) $browsershot->setChromePath(App::configuration('browsershot', 'chrome_path'));
+                    if (App::configuration('browsershot', 'node_binary')) {
+                        $browsershot->setNodeBinary(App::configuration('browsershot', 'node_binary'));
+                    }
+                    if (App::configuration('browsershot', 'npm_binary')) {
+                        $browsershot->setNpmBinary(App::configuration('browsershot', 'npm_binary'));
+                    }
+
+                    if ($token == '') {
+                        $browsershot->useCookies([@session_name() => @session_id()]);
+                    }
+
+                    $browsershot
+                        ->showBackground()
+                        ->preventUnsuccessfulResponse()
+                        ->waitUntilNetworkIdle()
+                        ->format('A4')
+                        ->save($localfilename);
                 }
-
-                $browsershot
-
-                    ->showBackground()
-                    ->preventUnsuccessfulResponse()
-                    ->waitUntilNetworkIdle()
-                    ->format('A4')
-                    ->save($localfilename);
             }
-        }
+        } finally {
+            if ($sessionWasActive) {
+                @session_start();
+            }
 
-        if ($sessionWasActive) {
-            @session_start();
-        }
-
-        if ($token != '') {
-            $session->removeToken($token);
+            if ($token != '') {
+                $session->removeToken($token);
+            }
         }
 
 
