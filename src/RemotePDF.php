@@ -143,14 +143,18 @@ class RemotePDF
         return true;
     }
 
-    private static function browsershot(string $url): Browsershot
+    /**
+     * @param string|null $url      null: Seite wird später per setHtml() gesetzt
+     * @param string|null $cacheName Unterverzeichnis des Chromium-Caches, Default: Mandanten-DB
+     */
+    public static function browsershot(?string $url, ?string $cacheName = null): Browsershot
     {
-        $chromiumDir = self::tempPath() . '/chromium_cache/' . self::db()->dbname;
+        $chromiumDir = self::tempPath() . '/chromium_cache/' . ($cacheName ?? self::db()->dbname);
         if (!file_exists($chromiumDir)) {
             mkdir($chromiumDir, 0777, true);
         }
 
-        $browsershot = Browsershot::url($url)->setEnvironmentOptions([
+        $browsershot = (is_null($url) ? new Browsershot() : Browsershot::url($url))->setEnvironmentOptions([
             'XDG_CONFIG_HOME' => $chromiumDir . '/.chromium',
             'XDG_CACHE_HOME' => $chromiumDir . '/.chromium',
         ]);
@@ -218,7 +222,7 @@ class RemotePDF
         return $url . self::db()->singleValue('select @sessionid s', [], 's') . $reportPath;
     }
 
-    private static function setting(string $key, string $default = ''): string
+    public static function setting(string $key, string $default = ''): string
     {
         return (string) App::configuration(self::CONFIG_SECTION, $key, $default);
     }
@@ -231,12 +235,20 @@ class RemotePDF
         return self::$db;
     }
 
-    private static function tempPath(): string
+    // tempPath is only set for logged-in sessions (bsc session/temp middleware)
+    public static function tempPath(): string
     {
-        return (string) App::get('tempPath');
+        $tempPath = (string) App::get('tempPath');
+        if ($tempPath === '') {
+            $tempPath = self::basePath() . '/temp';
+            if (!file_exists($tempPath)) {
+                @mkdir($tempPath, 0777, true);
+            }
+        }
+        return $tempPath;
     }
 
-    private static function basePath(): string
+    public static function basePath(): string
     {
         return (string) App::get('basePath');
     }

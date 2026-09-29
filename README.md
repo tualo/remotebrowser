@@ -32,6 +32,11 @@ Alle Einstellungen liegen in der Sektion `browsershot`:
 | `noSandbox`              | `0`     | `1`: Chrome mit `--no-sandbox` starten (nötig in Docker bzw. als root). |
 | `useHeadless`            | `0`     | `1`: neuen Headless-Modus von Chrome verwenden. |
 
+## Systemcheck
+
+- CLI: `./tm systemcheck` prüft proc_open, tempPath, node/npm, puppeteer, Chrome, Sandbox, Remote-Service und rendert eine Musterseite aus HTML.
+- Web (ohne Anmeldung): `GET /remote/check` führt dieselben Prüfungen aus und rendert zusätzlich `/remote/check/sample` über die URL – damit wird auch geprüft, ob der Server sich selbst erreicht. Antwort: JSON mit `success`, `errors` und `checks`.
+
 ## Hinweise
 
 - Der Browser ruft `/pugreporthtml/{tablename}/{template}/{id}` mit der Session des Aufrufers auf. Die PHP-Session wird dafür während der PDF-Erzeugung freigegeben, sonst blockiert der Session-Lock (`Navigation timeout`).
