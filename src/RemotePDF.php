@@ -97,6 +97,12 @@ class RemotePDF
             $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/~/' . $token . '' . $db->singleValue('select @sessionid s', [], 's') . '/pugreporthtml/' . $tablename . '/' . $template . '/' . $id . '';
         }
 
+        // the browser requests the page with our session cookie; keeping the lock would deadlock
+        $sessionWasActive = session_status() === PHP_SESSION_ACTIVE;
+        if ($sessionWasActive) {
+            session_write_close();
+        }
+
         try {
             if (App::configuration('browsershot', 'remote_service', '') != '') {
                 $client = new Client(
@@ -184,12 +190,17 @@ class RemotePDF
                 }
 
                 $browsershot
+
                     ->showBackground()
                     ->preventUnsuccessfulResponse()
                     ->waitUntilNetworkIdle()
                     ->format('A4')
                     ->save($localfilename);
             }
+        }
+
+        if ($sessionWasActive) {
+            @session_start();
         }
 
         if ($token != '') {
